@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>卒業アルバム</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+  :root {
+    --theme: #1f3a5f;
+    --bg: #f7f4ee;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6b6760;
+    --line: #e3ddd2;
+    --danger: #b3261e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Zen Kaku Gothic New", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+  }
+  .serif { font-family: "Shippori Mincho", serif; }
+  [hidden] { display: none !important; }
+
+  /* ---------- ロック画面 ---------- */
+  #lock {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 24px 16px;
+    background:
+      radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--theme) 18%, transparent), transparent 55%),
+      radial-gradient(circle at 90% 90%, color-mix(in srgb, var(--theme) 14%, transparent), transparent 50%),
+      var(--bg);
+  }
+  .lock-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 36px 24px 28px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,.06);
+  }
+  .emblem {
+    width: 56px; height: 56px; margin: 0 auto 18px;
+    border-radius: 50%;
+    background: var(--theme);
+    display: grid; place-items: center; color: #fff;
+  }
+  .lock-school { font-size: 14px; color: var(--muted); letter-spacing: .08em; margin: 0; }
+  .lock-title { font-size: 30px; margin: 6px 0 4px; color: var(--theme); letter-spacing: .1em; }
+  .lock-year { font-size: 13px; color: var(--muted); margin: 0 0 20px; }
+  .lock-msg { font-size: 13px; line-height: 1.8; color: var(--muted); margin: 0 0 20px; }
+  .pw-wrap { position: relative; }
+  input[type=password], input[type=text].pw {
+    width: 100%;
+    font: inherit; font-size: 16px;
+    padding: 14px 48px 14px 16px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+  }
+  input:focus { border-color: var(--theme); }
+  .eye {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    border: 0; background: none; padding: 8px; color: var(--muted); cursor: pointer;
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font: inherit; font-weight: 700; font-size: 16px;
+    border: 0; border-radius: 12px;
+    padding: 14px 20px;
+    background: var(--theme); color: #fff;
+    cursor: pointer;
+  }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .btn.block { width: 100%; margin-top: 12px; }
+  .err { color: var(--danger); font-size: 13px; min-height: 1.4em; margin: 10px 0 0; }
+
+  /* ---------- アルバム ---------- */
+  header.hero {
+    background: var(--theme);
+    color: #fff;
+    text-align: center;
+    padding: 56px 16px 44px;
+  }
+  .hero .school { margin: 0; font-size: 14px; letter-spacing: .15em; opacity: .85; }
+  .hero h1 { margin: 10px 0 6px; font-size: clamp(30px, 8vw, 46px); letter-spacing: .12em; font-weight: 700; }
+  .hero .year { margin: 0; font-size: 13px; opacity: .8; letter-spacing: .1em; }
+  .hero .welcome { margin: 26px auto 0; max-width: 520px; font-size: 15px; line-height: 2; white-space: pre-line; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 0 16px 64px; }
+  section { margin-top: 40px; }
+  h2 {
+    font-size: 18px; letter-spacing: .1em; margin: 0 0 14px;
+    display: flex; align-items: center; gap: 10px; color: var(--theme);
+  }
+  h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .count { font-size: 12px; color: var(--muted); font-weight: 400; letter-spacing: 0; }
+
+  .video-box {
+    background: #111; border-radius: 16px; overflow: hidden;
+    aspect-ratio: 16 / 9; display: grid; place-items: center; position: relative;
+  }
+  .video-box video { width: 100%; height: 100%; display: block; background: #000; }
+  .video-start { text-align: center; color: #fff; padding: 16px; }
+  .video-start p { margin: 10px 0 0; font-size: 12px; opacity: .7; }
+  .play-btn {
+    width: 72px; height: 72px; border-radius: 50%; border: 0; cursor: pointer;
+    background: rgba(255,255,255,.95); color: var(--theme);
+    display: inline-grid; place-items: center;
+  }
+  .progress { width: min(320px, 80%); height: 6px; background: rgba(255,255,255,.2); border-radius: 99px; overflow: hidden; margin: 14px auto 0; }
+  .progress > div { height: 100%; width: 0; background: #fff; transition: width .2s; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+  @media (min-width: 640px) { .grid { grid-template-columns: repeat(4, 1fr); gap: 8px; } }
+  @media (min-width: 960px) { .grid { grid-template-columns: repeat(5, 1fr); } }
+  .grid button {
+    padding: 0; border: 0; cursor: pointer; background: var(--line);
+    aspect-ratio: 1; overflow: hidden; border-radius: 6px;
+  }
+  .grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
+  .grid button:hover img { transform: scale(1.04); }
+
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 24px 16px 40px; }
+  .linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; }
+
+  /* ---------- 拡大表示 ---------- */
+  #viewer {
+    position: fixed; inset: 0; background: rgba(0,0,0,.95); z-index: 50;
+    display: flex; flex-direction: column; touch-action: pan-y;
+  }
+  .v-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: max(10px, env(safe-area-inset-top)) 8px 6px; color: #fff;
+  }
+  .v-top span { font-size: 14px; opacity: .8; padding-left: 8px; }
+  .icon-btn {
+    background: none; border: 0; color: #fff; padding: 10px; cursor: pointer;
+    display: inline-grid; place-items: center; border-radius: 50%;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,.12); }
+  .v-stage { flex: 1; position: relative; display: grid; place-items: center; overflow: hidden; }
+  .v-stage img { max-width: 100%; max-height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+  .v-nav { position: absolute; top: 50%; transform: translateY(-50%); }
+  .v-prev { left: 4px; } .v-next { right: 4px; }
+  @media (hover: none) { .v-nav { display: none; } }
+  .spinner {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 3px solid rgba(255,255,255,.25); border-top-color: #fff;
+    animation: spin .8s linear infinite; position: absolute;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- ロック画面 -->
+<div id="lock">
+  <form class="lock-card" id="lockForm" autocomplete="off">
+    <div class="emblem" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+    </div>
+    <p class="lock-school" data-cfg="schoolName"></p>
+    <h1 class="lock-title serif" data-cfg="title"></h1>
+    <p class="lock-year" data-cfg="year"></p>
+    <p class="lock-msg" data-cfg="lockMessage"></p>
+    <div class="pw-wrap">
+      <input type="password" id="pw" placeholder="パスワード" aria-label="パスワード" autocomplete="current-password">
+      <button type="button" class="eye" id="eye" aria-label="パスワードを表示">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <button class="btn block" id="unlockBtn" type="submit">アルバムを開く</button>
+    <p class="err" id="err" role="alert"></p>
+  </form>
+</div>
+
+<!-- アルバム本体 -->
+<div id="album" hidden>
+  <header class="hero">
+    <p class="school" data-cfg="schoolName"></p>
+    <h1 class="serif" data-cfg="title"></h1>
+    <p class="year" data-cfg="year"></p>
+    <p class="welcome serif" data-cfg="welcomeMessage"></p>
+  </header>
+  <main>
+    <section id="videoSection" hidden>
+      <h2 class="serif" data-cfg="videoTitle"></h2>
+      <div class="video-box" id="videoBox">
+        <div class="video-start" id="videoStart">
+          <button class="play-btn" id="videoLoad" aria-label="動画を再生">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <p id="videoInfo">タップして読み込み</p>
+          <div class="progress" id="videoProg" hidden><div></div></div>
+        </div>
+      </div>
+    </section>
+    <section>
+      <h2 class="serif">写真 <span class="count" id="photoCount"></span></h2>
+      <div class="grid" id="grid"></div>
+    </section>
+  </main>
+  <footer>
+    <p data-cfg="schoolName"></p>
+    <button class="linkbtn" id="logout">ロックする</button>
+  </footer>
+</div>
+
+<!-- 拡大表示 -->
+<div id="viewer" hidden>
+  <div class="v-top">
+    <span id="vCount"></span>
+    <div>
+      <a class="icon-btn" id="vSave" aria-label="保存" download>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      </a>
+      <button class="icon-btn" id="vClose" aria-label="閉じる">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="v-stage" id="vStage">
+    <div class="spinner" id="vSpin"></div>
+    <img id="vImg" alt="">
+    <button class="icon-btn v-nav v-prev" id="vPrev" aria-label="前の写真">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <button class="icon-btn v-nav v-next" id="vNext" aria-label="次の写真">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const cfg = Object.assign({
+    schoolName: "", year: "", title: "卒業アルバム", lockMessage: "",
+    welcomeMessage: "", videoTitle: "動画", themeColor: "#1f3a5f", allowDownload: true
+  }, window.ALBUM_CONFIG || {});
+
+  // 設定の反映
+  document.documentElement.style.setProperty("--theme", cfg.themeColor);
+  document.title = [cfg.title, cfg.schoolName].filter(Boolean).join(" | ");
+  document.querySelectorAll("[data-cfg]").forEach(el => {
+    const v = cfg[el.dataset.cfg];
+    if (v) el.textContent = v; else el.hidden = true;
+  });
+
+  const $ = id => document.getElementById(id);
+  const DATA = "data/";
+  let key = null, manifest = null;
+  const fullCache = new Map();
+
+  const b64ToBytes = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+  async function deriveKey(pw, meta) {
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: b64ToBytes(meta.salt), iterations: meta.iter, hash: "SHA-256" },
+      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  }
+  const decrypt = (buf) => crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: new Uint8Array(buf, 0, 12) }, key, new Uint8Array(buf, 12));
+
+  async function fetchBuf(path) {
+    const r = await fetch(DATA + path, { cache: "no-cache" });
+    if (!r.ok) throw new Error("not found: " + path);
+    return r.arrayBuffer();
+  }
+
+  // ---------- ロック解除 ----------
+  $("eye").onclick = () => { const p = $("pw"); p.type = p.type === "password" ? "text" : "password"; };
+
+  $("lockForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const pw = $("pw").value;
+    if (!pw) return;
+    $("err").textContent = "";
+    $("unlockBtn").disabled = true;
+    $("unlockBtn").textContent = "確認中…";
+    try {
+      if (!window.crypto || !crypto.subtle) throw new Error("nocrypto");
+      let meta;
+      try { meta = await (await fetch(DATA + "meta.json", { cache: "no-cache" })).json(); }
+      catch { throw new Error("nodata"); }
+      key = await deriveKey(pw, meta);
+      let plain;
+      try { plain = await decrypt(await fetchBuf("manifest.bin")); }
+      catch { throw new Error("badpw"); }
+      manifest = JSON.parse(new TextDecoder().decode(plain));
+      try { sessionStorage.setItem("album-pw", pw); } catch {}
+      openAlbum();
+    } catch (err) {
+      key = null;
+      $("err").textContent =
+        err.message === "badpw" ? "パスワードが違います" :
+        err.message === "nodata" ? "アルバムのデータが見つかりません（管理者の方へ: data フォルダをアップロードしてください）" :
+        err.message === "nocrypto" ? "このブラウザでは開けません。Safari / Chrome でお試しください" :
+        "読み込みに失敗しました。通信環境を確認してください";
+      $("pw").select();
+    } finally {
+      $("unlockBtn").disabled = false;
+      $("unlockBtn").textContent = "アルバムを開く";
+    }
+  };
+
+  $("logout").onclick = () => { try { sessionStorage.removeItem("album-pw"); } catch {} location.reload(); };
+
+  // 同じタブでの再読み込み時は自動で開く
+  try {
+    const saved = sessionStorage.getItem("album-pw");
+    if (saved) { $("pw").value = saved; $("lockForm").requestSubmit(); }
+  } catch {}
+
+  // ---------- アルバム表示 ----------
+  function openAlbum() {
+    $("lock").hidden = true;
+    $("album").hidden = false;
+    window.scrollTo(0, 0);
+
+    const grid = $("grid");
+    grid.innerHTML = "";
+    $("photoCount").textContent = manifest.photos.length + "枚";
+    manifest.photos.forEach((p, i) => {
+      const b = document.createElement("button");
+      b.setAttribute("aria-label", `写真 ${i + 1}`);
+      const img = document.createElement("img");
+      img.src = p.t; img.alt = ""; img.loading = "lazy"; img.decoding = "async";
+      b.appendChild(img);
+      b.onclick = () => openViewer(i);
+      grid.appendChild(b);
+    });
+
+    if (manifest.video) {
+      $("videoSection").hidden = false;
+      const mb = (manifest.video.size / 1048576).toFixed(0);
+      $("videoInfo").textContent = `タップして読み込み（約${mb}MB）`;
+    }
+  }
+
+  // ---------- 動画 ----------
+  $("videoLoad").onclick = async () => {
+    const v = manifest.video;
+    $("videoLoad").disabled = true;
+    $("videoProg").hidden = false;
+    const bar = $("videoProg").firstElementChild;
+    const total = v.encSize || v.size;
+    let loaded = 0;
+    const parts = [];
+    try {
+      for (const name of v.chunks) {
+        const r = await fetch(DATA + name, { cache: "no-cache" });
+        if (!r.ok || !r.body) throw new Error("fetch");
+        const reader = r.body.getReader();
+        const pieces = []; let len = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          pieces.push(value); len += value.length; loaded += value.length;
+          bar.style.width = Math.min(100, loaded / total * 100) + "%";
+          $("videoInfo").textContent = `読み込み中… ${Math.floor(loaded / total * 100)}%`;
+        }
+        const buf = new Uint8Array(len); let o = 0;
+        for (const p of pieces) { buf.set(p, o); o += p.length; }
+        parts.push(new Blob([await decrypt(buf.buffer)]));
+      }
+      const url = URL.createObjectURL(new Blob(parts, { type: v.type || "video/mp4" }));
+      const el = document.createElement("video");
+      el.src = url; el.controls = true; el.playsInline = true; el.preload = "auto";
+      $("videoBox").innerHTML = "";
+      $("videoBox").appendChild(el);
+      el.play().catch(() => {});
+    } catch {
+      $("videoInfo").textContent = "読み込みに失敗しました。タップしてもう一度";
+      $("videoLoad").disabled = false;
+      $("videoProg").hidden = true;
+    }
+  };
+
+  // ---------- 拡大表示 ----------
+  let cur = 0;
+  function getFull(i) {
+    if (!fullCache.has(i)) {
+      const p = fetchBuf(manifest.photos[i].f)
+        .then(decrypt)
+        .then(b => URL.createObjectURL(new Blob([b], { type: "image/jpeg" })));
+      p.catch(() => fullCache.delete(i));
+      fullCache.set(i, p);
+    }
+    return fullCache.get(i);
+  }
+  async function show(i) {
+    const n = manifest.photos.length;
+    cur = (i + n) % n;
+    $("vCount").textContent = `${cur + 1} / ${n}`;
+    const img = $("vImg");
+    img.src = manifest.photos[cur].t; // まずサムネイル
+    $("vSpin").hidden = false;
+    $("vSave").hidden = true;
+    const me = cur;
+    try {
+      const url = await getFull(me);
+      if (me !== cur) return;
+      img.src = url;
+      if (cfg.allowDownload) {
+        $("vSave").href = url;
+        $("vSave").download = `photo_${String(me + 1).padStart(3, "0")}.jpg`;
+        $("vSave").hidden = false;
+      }
+    } catch {} finally { if (me === cur) $("vSpin").hidden = true; }
+    getFull((cur + 1) % n).catch(() => {});
+    getFull((cur - 1 + n) % n).catch(() => {});
+  }
+  function openViewer(i) {
+    $("viewer").hidden = false;
+    document.body.style.overflow = "hidden";
+    show(i);
+  }
+  function closeViewer() {
+    $("viewer").hidden = true;
+    document.body.style.overflow = "";
+  }
+  $("vClose").onclick = closeViewer;
+  $("vPrev").onclick = () => show(cur - 1);
+  $("vNext").onclick = () => show(cur + 1);
+  document.addEventListener("keydown", e => {
+    if ($("viewer").hidden) return;
+    if (e.key === "Escape") closeViewer();
+    if (e.key === "ArrowLeft") show(cur - 1);
+    if (e.key === "ArrowRight") show(cur + 1);
+  });
+  // スワイプ
+  let sx = null, sy = null;
+  $("vStage").addEventListener("touchstart", e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  $("vStage").addEventListener("touchend", e => {
+    if (sx === null) return;
+    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) show(cur + (dx < 0 ? 1 : -1));
+    else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) closeViewer();
+    sx = sy = null;
+  });
+})();
+</script>
+</body>
+</html>
